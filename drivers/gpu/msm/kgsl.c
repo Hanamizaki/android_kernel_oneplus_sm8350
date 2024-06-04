@@ -349,8 +349,6 @@ static void kgsl_destroy_ion(struct kgsl_memdesc *memdesc)
 
 	if (meta != NULL) {
 		remove_dmabuf_list(meta);
-		dma_buf_unmap_attachment(meta->attach, meta->table,
-			DMA_BIDIRECTIONAL);
 		dma_buf_detach(meta->dmabuf, meta->attach);
 		dma_buf_put(meta->dmabuf);
 		kfree(meta);
@@ -3039,6 +3037,8 @@ static int kgsl_setup_dma_buf(struct kgsl_device *device,
 		goto out;
 	}
 
+	dma_buf_unmap_attachment(attach, sg_table, DMA_BIDIRECTIONAL);
+
 	meta->table = sg_table;
 	entry->priv_data = meta;
 	entry->memdesc.sgt = sg_table;
@@ -4642,7 +4642,7 @@ void kgsl_core_exit(void)
 int __init kgsl_core_init(void)
 {
 	int result = 0;
-	struct sched_param param = { .sched_priority = 2 };
+	struct sched_param param = { .sched_priority = 16 };
 
 	place_marker("M - DRIVER KGSL Init");
 
